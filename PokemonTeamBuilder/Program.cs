@@ -87,12 +87,9 @@ namespace PokedexAppUseRedis
 			app.UseAuthentication();
 			app.UseAuthorization();
 
-			
 
-			app.UseEndpoints(endpoint =>
-			{
-				endpoint.MapControllers();
-			});
+
+			app.MapControllers();
 			
 
 			app.Run();

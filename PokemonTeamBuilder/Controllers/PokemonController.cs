@@ -32,18 +32,13 @@ namespace PokedexAppUseRedis.Controllers
 			return Ok(pokemonList);
 		}
 
-
-
-
-
-		private List<int> GetPokemonIdList(int page, int numberOfPokemons)
+		[HttpGet("/GetPOkemonInfoByName/{name}")]
+		public async Task<IActionResult> GetPokemonInfoByName(string name)
 		{
-			var pokemonIdList = new List<int>();
-			for(int i = 1; i <= numberOfPokemons; i++)
-			{
-				pokemonIdList.Add((page - 1) * numberOfPokemons + i);
-			}
-			return pokemonIdList;
+			var pokemon = await _pokeApiClient.GetResourceAsync<Pokemon>(name);
+			return Ok(pokemon);
 		}
+
+
 	}
 }
