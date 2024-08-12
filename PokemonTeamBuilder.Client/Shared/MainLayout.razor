@@ -1,0 +1,48 @@
+﻿@using PokemonTeamBuilder.Client.Helper
+
+@inherits LayoutComponentBase
+@inject AuthHelper _authHelper
+@inject NotifyLoginService _notifyLoginService;
+
+
+@* Required *@
+<MudThemeProvider />
+
+
+@* Needed for dialogs *@
+<MudDialogProvider />
+
+@* Needed for snackbars *@
+<MudSnackbarProvider />
+
+<MudAppBar>
+	<MudSpacer></MudSpacer>
+		@if(_notifyLoginService != null && _notifyLoginService.UserName != "")
+		{
+			<MudAvatar Color="Color.Secondary">@_notifyLoginService.UserName.ToUpper()[0]</MudAvatar>
+		}
+		else
+		{
+			<a href="/login">
+				<MudButton Variant="Variant.Filled" Color="Color.Surface">Sign In</MudButton>
+			</a>
+		}
+</MudAppBar>
+
+@Body
+
+
+@code{
+	private bool isSignIn = false;
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		_notifyLoginService.LoginSuccess += LoginSuccess;
+	}
+
+	private void LoginSuccess(object sender, EventArgs e)
+	{
+		this.StateHasChanged();
+	}
+}

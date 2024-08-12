@@ -14,5 +14,8 @@ namespace Shared_Library.Models
 		public int Id { get; set; }
 		[Required]
 		public string Name { get; set; }
+
+		public IEnumerable<PokemonMoveChoose> MovesHaveType { get; set; }
+		public IEnumerable<PokemonSetUp> PokemonsHaveType { get; set; }
     }
 }

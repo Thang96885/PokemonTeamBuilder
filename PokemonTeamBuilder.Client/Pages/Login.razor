@@ -1,0 +1,73 @@
+﻿@page "/login"
+
+@using PokemonTeamBuilder.Client.Helper
+@using Shared_Library.Dto
+@inject IAuthService _authService;
+@inject ISnackbar _snackbar;
+@inject AuthHelper _authHelper;
+@inject NotifyLoginService _notifyLoginService;
+
+
+<PageTitle>Login</PageTitle>
+
+
+<div class="d-flex justify-content-center align-items-center">
+	<MudForm Model="loginInfo">
+		<MudPaper class="pa-16 ma-2">
+			<div>
+				<h2>Login</h2>
+			</div>
+			
+
+			<MudTextField @bind-Value="loginInfo.UserNameOrEmail" Label="User name or Email" Required="true"
+			RequiredError="User name or email is required"></MudTextField>
+
+			<MudTextField @bind-Value="loginInfo.Password" InputType="InputType.Password" Required="true"
+			RequiredError="Password is required" Label="Password"></MudTextField>
+
+			<div class="d-flex justify-content-center align-items-center ma-5">
+				<MudButton Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Button" OnClick="LoginEvent" FullWidth="true" Class="m-2">Login</MudButton>
+			</div>
+
+			
+			<div class="d-flex justify-content-center align-items-center">
+				<p>Or login using</p>
+			</div>
+			<div class="d-flex justify-content-center align-items-center">
+				<div class="d-inline-flex">
+					<img src="Pic/facebook.png" height="30" width="30" class="m-2"/>
+				</div>
+				<div class="d-inline-flex">
+					<img src="Pic/google.png" height="30" width="30" class="m-2"/>
+				</div>
+			</div>
+		</MudPaper>
+
+	</MudForm>
+</div>
+
+
+@code {
+	private LoginRequestDto loginInfo;
+
+	protected override void OnInitialized()
+	{
+		loginInfo = new LoginRequestDto();
+		base.OnInitialized();
+	}
+
+	private async Task LoginEvent()
+	{
+		var result = await _authService.Login(loginInfo);
+		if(result.IsSuccess == false)
+		{
+			_snackbar.Add(result.Message, Severity.Error);
+		}
+		else
+		{
+			_snackbar.Add(result.Message, Severity.Success);
+			_authHelper.StoreToken(result);
+			_notifyLoginService.SetUserName(result.UserName.ToUpper());
+		}
+	}
+}

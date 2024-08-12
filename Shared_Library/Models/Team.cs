@@ -17,5 +17,7 @@ namespace Shared_Library.Models
         public int UserId { get; set; }
         public string TeamName { get; set; }
         public User User { get; set; }
+
+        public IEnumerable<PokemonSetUp> PokemonSetUps { get; set; }
     }
 }

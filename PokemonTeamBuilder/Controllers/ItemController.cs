@@ -18,7 +18,7 @@ namespace PokemonTeamBuilder.Api.Controllers
 		[HttpGet("/GetAllItems")]
 		public async Task<IActionResult> GetAllItems()
 		{
-			var items = await _pokeApiClient.GetNamedResourcePageAsync<Item>(1000, 0);
+			var items = await _pokeApiClient.GetNamedResourcePageAsync<Item>(2000, 0);
 			return Ok(items);
 		}
 	}

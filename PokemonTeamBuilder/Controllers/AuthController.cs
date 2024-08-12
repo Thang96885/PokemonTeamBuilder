@@ -46,7 +46,7 @@ namespace PokedexAppUseRedis.Controllers
 		{
 			if (registerInfo == null && string.IsNullOrEmpty(registerInfo.UserName) && string.IsNullOrEmpty(registerInfo.Password) && string.IsNullOrEmpty(registerInfo.Email))
 			{
-				return BadRequest("Invalid input");
+				return BadRequest("InValid input");
 			}
 
 			User user =_mapper.Map<User>(registerInfo);
@@ -70,21 +70,23 @@ namespace PokedexAppUseRedis.Controllers
 
 
 		[HttpPost("login")]
-		public async Task<IActionResult> Login([FromBody] LoginRequestDto loginInfo)
+		public async Task<ActionResult<LoginResultDto>> Login([FromBody] LoginRequestDto loginInfo)
 		{
-			var user = await FindUser(loginInfo.UserNameOrEmail);
-			if(user == null)
-			{
-				return BadRequest("User name or email is not correct");
-			}
-
 			LoginResultDto result = new LoginResultDto
 			{
 				IsSuccess = false,
 				JwtToken = "",
 				RefreshToken = "",
-				Message = "Login successfully"
+				Message = "Login false",
+				UserName = ""
 			};
+			var user = await FindUser(loginInfo.UserNameOrEmail);
+			if(user == null)
+			{
+				return BadRequest(result);
+			}
+
+			
 
 			var loginResult = await _signInManager.PasswordSignInAsync(user, loginInfo.Password, false, false);
 			if(loginResult.Succeeded)
@@ -98,12 +100,14 @@ namespace PokedexAppUseRedis.Controllers
 				result.RefreshToken = user.RefreshToken;
 				
 				await _userManager.UpdateAsync(user);
+				result.UserName = user.UserName;
+				result.Message = "Login successfully";
 				return Ok(result);
 			}	
 			else
 			{
 				result.Message = "Login failed";
-				return Ok(result);
+				return BadRequest(result);
 			}
 		}
 

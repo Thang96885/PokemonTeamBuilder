@@ -23,6 +23,15 @@ namespace Shared_Library.Data
 			base.OnModelCreating(builder);
 
             builder.Entity<Team>().Property(t => t.TeamName).HasDefaultValue("New Team");
+            builder.Entity<PokemonMoveChoose>(m =>
+            {
+                m.HasIndex(m => m.Url).IsUnique();
+            });
+
+            builder.Entity<TypeDto>(t =>
+            {
+                t.HasIndex(t => t.Name).IsUnique();
+            });
 		}
 
 		public DbSet<PokemonSetUp> PokemonSetUps { get; set; }

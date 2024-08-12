@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shared_Library.Data;
 
@@ -11,9 +12,10 @@ using Shared_Library.Data;
 namespace Shared_Library.Data
 {
     [DbContext(typeof(PokemonTeamBuilderContext))]
-    partial class PokemonTeamBuilderContextModelSnapshot : ModelSnapshot
+    [Migration("20240808155920_AddRelationToTeamAndPokemonSetup")]
+    partial class AddRelationToTeamAndPokemonSetup
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -125,21 +127,6 @@ namespace Shared_Library.Data
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PokemonSetUpTypeDto", b =>
-                {
-                    b.Property<int>("PokemonsHaveTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TypesId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PokemonsHaveTypeId", "TypesId");
-
-                    b.HasIndex("TypesId");
-
-                    b.ToTable("PokemonSetUpTypeDto");
-                });
-
             modelBuilder.Entity("Shared_Library.Models.PokemonMoveChoose", b =>
                 {
                     b.Property<int>("Id")
@@ -152,7 +139,7 @@ namespace Shared_Library.Data
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PokemonSetUpId")
+                    b.Property<int?>("PokemonSetUpId")
                         .HasColumnType("int");
 
                     b.Property<int?>("Power")
@@ -163,16 +150,13 @@ namespace Shared_Library.Data
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PokemonSetUpId");
 
                     b.HasIndex("TypeId");
-
-                    b.HasIndex("Url")
-                        .IsUnique();
 
                     b.ToTable("Moves");
                 });
@@ -185,11 +169,10 @@ namespace Shared_Library.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("AbilityName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("AbilityId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("ItemName")
+                    b.Property<string>("AbilityName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -274,12 +257,14 @@ namespace Shared_Library.Data
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PokemonSetUpId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("PokemonSetUpId");
 
                     b.ToTable("Types");
                 });
@@ -413,36 +398,17 @@ namespace Shared_Library.Data
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PokemonSetUpTypeDto", b =>
-                {
-                    b.HasOne("Shared_Library.Models.PokemonSetUp", null)
-                        .WithMany()
-                        .HasForeignKey("PokemonsHaveTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Shared_Library.Models.TypeDto", null)
-                        .WithMany()
-                        .HasForeignKey("TypesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Shared_Library.Models.PokemonMoveChoose", b =>
                 {
-                    b.HasOne("Shared_Library.Models.PokemonSetUp", "PokemonSetUp")
+                    b.HasOne("Shared_Library.Models.PokemonSetUp", null)
                         .WithMany("Moves")
-                        .HasForeignKey("PokemonSetUpId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PokemonSetUpId");
 
                     b.HasOne("Shared_Library.Models.TypeDto", "Type")
-                        .WithMany("MovesHaveType")
+                        .WithMany()
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("PokemonSetUp");
 
                     b.Navigation("Type");
                 });
@@ -469,19 +435,23 @@ namespace Shared_Library.Data
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Shared_Library.Models.TypeDto", b =>
+                {
+                    b.HasOne("Shared_Library.Models.PokemonSetUp", null)
+                        .WithMany("Types")
+                        .HasForeignKey("PokemonSetUpId");
+                });
+
             modelBuilder.Entity("Shared_Library.Models.PokemonSetUp", b =>
                 {
                     b.Navigation("Moves");
+
+                    b.Navigation("Types");
                 });
 
             modelBuilder.Entity("Shared_Library.Models.Team", b =>
                 {
                     b.Navigation("PokemonSetUps");
-                });
-
-            modelBuilder.Entity("Shared_Library.Models.TypeDto", b =>
-                {
-                    b.Navigation("MovesHaveType");
                 });
 
             modelBuilder.Entity("Shared_Library.Models.User", b =>

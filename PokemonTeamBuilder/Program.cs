@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using PokeApiNet;
 using PokedexAppUseRedis.ClassSupports;
 using PokedexAppUseRedis.Middleware;
+using PokemonTeamBuilder.Api.Repositories;
 using Shared_Library.Data;
 using Shared_Library.Models;
 using StackExchange.Redis;
@@ -58,6 +59,13 @@ namespace PokedexAppUseRedis
 
 			builder.Services.AddAutoMapper(typeof(CustomAutoMapperProfile));
 
+			builder.Services.AddScoped<UnitOfWork>();
+
+			builder.Services.AddCors(options =>
+			{
+				options.AddPolicy("AllowAll", policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+			});
+
 			
 
 
@@ -82,8 +90,25 @@ namespace PokedexAppUseRedis
 				
 			});
 
+			app.Map("/seedTypeDto", async Task (PokeApiClient pokeClient, PokemonTeamBuilderContext context) =>
+			{
+				var types = await pokeClient.GetNamedResourcePageAsync<PokeApiNet.Type>(20, 0);
+				foreach(var type in types.Results)
+				{
+					var typeDto = new TypeDto
+					{
+						Name = type.Name
+					};
+					context.Types.Add(typeDto);
+					context.SaveChanges();
+				}	
+
+
+			});
+
 			app.UseRouting();
-			
+
+			app.UseCors("AllowAll");
 			app.UseAuthentication();
 			app.UseAuthorization();
 

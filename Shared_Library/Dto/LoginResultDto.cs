@@ -11,6 +11,8 @@ namespace Shared_Library.Dto
         public string Message { get; set; }
         public string JwtToken { get; set; }
         public string RefreshToken { get; set; }
+
+        public string UserName { get; set; }
         public bool IsSuccess { get; set; }
     }
 }

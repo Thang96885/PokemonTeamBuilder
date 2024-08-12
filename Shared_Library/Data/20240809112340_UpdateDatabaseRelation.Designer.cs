@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shared_Library.Data;
 
@@ -11,9 +12,10 @@ using Shared_Library.Data;
 namespace Shared_Library.Data
 {
     [DbContext(typeof(PokemonTeamBuilderContext))]
-    partial class PokemonTeamBuilderContextModelSnapshot : ModelSnapshot
+    [Migration("20240809112340_UpdateDatabaseRelation")]
+    partial class UpdateDatabaseRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -152,7 +154,7 @@ namespace Shared_Library.Data
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PokemonSetUpId")
+                    b.Property<int?>("PokemonSetUpId")
                         .HasColumnType("int");
 
                     b.Property<int?>("Power")
@@ -185,11 +187,10 @@ namespace Shared_Library.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("AbilityName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("AbilityId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("ItemName")
+                    b.Property<string>("AbilityName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -430,19 +431,15 @@ namespace Shared_Library.Data
 
             modelBuilder.Entity("Shared_Library.Models.PokemonMoveChoose", b =>
                 {
-                    b.HasOne("Shared_Library.Models.PokemonSetUp", "PokemonSetUp")
+                    b.HasOne("Shared_Library.Models.PokemonSetUp", null)
                         .WithMany("Moves")
-                        .HasForeignKey("PokemonSetUpId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PokemonSetUpId");
 
                     b.HasOne("Shared_Library.Models.TypeDto", "Type")
                         .WithMany("MovesHaveType")
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("PokemonSetUp");
 
                     b.Navigation("Type");
                 });

@@ -17,10 +17,12 @@ namespace Shared_Library.Models
         public int TeamId { get; set; }
         public int PokId { get; set; }
         public string PokemonName { get; set; }
-        public int AbilityId { get; set; }
         public string AbilityName { get; set; }
+        public string ItemName { get; set; }
         public ICollection<PokemonMoveChoose> Moves { get; set; }
         public ICollection<TypeDto> Types { get; set; }
+
+        public Team Team { get; set; }
         
     }
 }

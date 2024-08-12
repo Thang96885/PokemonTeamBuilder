@@ -9,6 +9,7 @@ namespace PokedexAppUseRedis.ClassSupports
 		public CustomAutoMapperProfile()
 		{
 			CreateMap<RegisterRequestDto, User>();
+			CreateMap<TeamCreateRequestDto, Team>(MemberList.Destination);
 		}
 	}
 }
