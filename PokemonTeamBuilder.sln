@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokemonTeamBuilder.Api", "P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared_Library", "Shared_Library\Shared_Library.csproj", "{C99E128F-B82D-4B58-B9B1-7FE5387E8F23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonTeamBuilder.Client", "PokemonTeamBuilder.Client\PokemonTeamBuilder.Client.csproj", "{CB89A780-6C65-4440-9CB7-AC5207466C7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokemonTeamBuilder.Client", "PokemonTeamBuilder.Client\PokemonTeamBuilder.Client.csproj", "{CB89A780-6C65-4440-9CB7-AC5207466C7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

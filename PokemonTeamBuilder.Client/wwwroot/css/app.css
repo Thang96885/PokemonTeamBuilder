@@ -62,3 +62,8 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+    .pokemon-block{
+        height: 200px;
+        width: 50px;
+    }

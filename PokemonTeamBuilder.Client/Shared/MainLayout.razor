@@ -15,21 +15,30 @@
 @* Needed for snackbars *@
 <MudSnackbarProvider />
 
-<MudAppBar>
-	<MudSpacer></MudSpacer>
-		@if(_notifyLoginService != null && _notifyLoginService.UserName != "")
-		{
-			<MudAvatar Color="Color.Secondary">@_notifyLoginService.UserName.ToUpper()[0]</MudAvatar>
-		}
-		else
-		{
-			<a href="/login">
-				<MudButton Variant="Variant.Filled" Color="Color.Surface">Sign In</MudButton>
-			</a>
-		}
-</MudAppBar>
 
-@Body
+<MudLayout>
+	<MudMainContent>
+		<MudAppBar>
+			<MudSpacer></MudSpacer>
+			@if (_notifyLoginService != null && _notifyLoginService.UserName != "")
+			{
+				<MudAvatar Color="Color.Secondary">@_notifyLoginService.UserName.ToUpper()[0]</MudAvatar>
+			}
+			else
+			{
+				<a href="/login">
+					<MudButton Variant="Variant.Filled" Color="Color.Surface">Sign In</MudButton>
+				</a>
+			}
+		</MudAppBar>
+	</MudMainContent>
+	@Body
+</MudLayout>
+
+	
+
+
+
 
 
 @code{

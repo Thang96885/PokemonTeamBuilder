@@ -24,8 +24,9 @@ namespace PokedexAppUseRedis
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 			builder.Services.AddControllers();
-
+			
 			builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(builder.Configuration.GetSection("Redis:Endpoints:Default").Value));
+
 
 			builder.Services.AddScoped<PokeApiClient>();
 

@@ -1,0 +1,137 @@
+﻿@page "/setup-team"
+@using PokeApiNet
+@using PokemonTeamBuilder.Client.Helper
+@using Shared_Library.Models
+
+@inject IPokemonService _pokemonService;
+@inject IItemService _itemService;
+
+<div class="d-flex align-items-center justify-content-center m-4">
+	<h1>MY POKEMON TEAM</h1>
+</div>
+
+<div class="d-flex flex-md-wrap flex-column">
+	
+		<div class="d-flex flex-md-wrap w-50">
+			@foreach (var pokemonChoose in PokemonChooses)
+			{
+		
+				<div class="d-flex flex-row border-1 m-2 rounded-1" style="height: 280px; width: 300px">
+					<div class="d-flex flex-column w-50">
+						<div>
+							<MudAutocomplete T="string" Label="Name" @bind-Value="pokemonChoose.PokemonName" MaxItems="null"
+												SearchFuncWithCancel="async (search, token) => {return  await PokemonSearchHelper<Pokemon>.SearchName(search, pokemonList.Results, token);}" TextChanged="OnSelectPokemon"
+							></MudAutocomplete>
+						</div>
+						<div class="d-flex align-items-center justify-content-center m-2" style="height: 80px">
+							@if(string.IsNullOrEmpty(pokemonChoose.PicUrl))
+							{
+								<img src="/Pic/question.png" height="66" width="84"/>
+							}
+							else
+							{
+								<img src="@pokemonChoose.PicUrl" height="60" width="60"/>
+							}
+						</div>
+						<MudAutocomplete MaxHeight="35" T="string" @bind-Value="pokemonChoose.ItemName" Label="Item"
+						SearchFuncWithCancel="async (search, token) => {return await PokemonSearchHelper<Item>.SearchName(search, ItemList.Results, token);}"
+							></MudAutocomplete>
+						
+					</div>
+					<div class="d-flex flex-column w-50">
+						@foreach (var pokemonMove in pokemonChoose.Moves)
+						{
+							<div class="d-flex flex-grow-1">
+							<MudAutocomplete T="string" @bind-Value="pokemonMove.Name" Label="Move"
+											 SearchFuncWithCancel="async (search, token) => {return await PokemonSearchHelper<Move>.SearchName(search, PokemonInfo[FindIndexHasPokName(pokemonChoose.PokemonName)].Moves.Select(m => m.Move).ToList(), token);}"></MudAutocomplete>
+							</div>
+							
+						}
+						<div class="d-flex flex-grow-1">
+							<MudAutocomplete T="string" @bind-Value="pokemonChoose.AbilityName" Label="Ability"
+										 SearchFuncWithCancel="async (search, token) => {return await PokemonSearchHelper<Ability>.SearchName(search, PokemonInfo[FindIndexHasPokName(pokemonChoose.PokemonName)].Abilities.Select(a => a.Ability).ToList(), token);}"></MudAutocomplete>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+		
+
+		<div class="d-flex flex-md-wrap w-50">
+			
+		</div>
+	
+</div>
+
+@code {
+	List<PokemonSetUp> PokemonChooses { get; set; }
+	List<Pokemon> PokemonInfo { get; set; }
+
+	NamedApiResourceList<Pokemon> pokemonList { get; set; }
+	NamedApiResourceList<Item> ItemList { get; set; }
+	protected override async Task OnInitializedAsync()
+	{
+		PokemonChooses = new List<PokemonSetUp>();
+		PokemonInfo = new List<Pokemon>();
+		for(int i = 0; i < 6; i++)
+		{
+			PokemonChooses.Add(new PokemonSetUp());
+			PokemonInfo.Add(new Pokemon());
+		}
+
+		pokemonList = await _pokemonService.GetAllPokemonAsync();
+		ItemList = await _itemService.GetAllItemsAsync();
+	}
+
+
+	private async Task<IEnumerable<string>> SearchPokemonName(string searchText, CancellationToken token)
+	{
+		await Task.Delay(10, token);
+
+		var result = await Task.Run(() =>
+		{
+			if (string.IsNullOrEmpty(searchText))
+			{
+				return pokemonList.Results.Select(p => p.Name);
+			}
+
+			return pokemonList.Results.Where(p => p.Name.ToLower().Contains(searchText.ToLower())).Select(p => p.Name);
+		});
+		return result.ToList();
+	}
+
+	private async Task OnSelectPokemon(string PokName)
+	{
+		if(CheckPokemonName(PokName))
+		{
+			int index = FindIndexHasPokName(PokName);
+			PokemonInfo[index] = await _pokemonService.GetPokemonInfoByNameAsync(PokName);
+			PokemonChooses[index].PicUrl = $"https://play.pokemonshowdown.com/sprites/ani/{PokemonInfo[index].Name.ToLower()}.gif";
+		}
+		
+	}
+
+	private bool CheckPokemonName(string PokName)
+	{
+		foreach(var pokemon in pokemonList.Results)
+		{
+			if(pokemon.Name == PokName)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private int FindIndexHasPokName(string PokName)
+	{
+		for(int i = 0; i < PokemonChooses.Count; i++)
+		{
+			if(PokemonChooses[i].PokemonName == PokName)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+}

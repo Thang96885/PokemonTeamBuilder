@@ -30,9 +30,10 @@ namespace PokedexAppUseRedis.Controllers
 		{
 			var pokemonList = await _pokeApiClient.GetNamedResourcePageAsync<Pokemon>(1302, 0);
 			return Ok(pokemonList);
+			
 		}
 
-		[HttpGet("/GetPOkemonInfoByName/{name}")]
+		[HttpGet("/GetPokemonInfoByName/{name}")]
 		public async Task<IActionResult> GetPokemonInfoByName(string name)
 		{
 			var pokemon = await _pokeApiClient.GetResourceAsync<Pokemon>(name);

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Shared_Library.Models
 {
-    public class PokemonSetUp
+    public partial class PokemonSetUp
 	{
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -19,10 +19,24 @@ namespace Shared_Library.Models
         public string PokemonName { get; set; }
         public string AbilityName { get; set; }
         public string ItemName { get; set; }
-        public ICollection<PokemonMoveChoose> Moves { get; set; }
-        public ICollection<TypeDto> Types { get; set; }
+        public IList<PokemonMoveChoose> Moves { get; set; }
+        public IList<TypeDto> Types { get; set; }
 
         public Team Team { get; set; }
-        
+    }
+
+    public partial class PokemonSetUp
+    {
+        public string PicUrl { get; set; }
+
+        public PokemonSetUp()
+		{
+			Moves = new List<PokemonMoveChoose>();
+            for(int i = 0; i < 4; i++)
+            {
+                Moves.Add(new PokemonMoveChoose());
+            }    
+			Types = new List<TypeDto>();
+		}
     }
 }

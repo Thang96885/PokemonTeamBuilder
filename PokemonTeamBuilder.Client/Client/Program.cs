@@ -27,6 +27,8 @@ namespace PokemonTeamBuilder.Client
 
 			builder.Services.AddScoped<IAuthService, AuthService>();
 			builder.Services.AddScoped<NotifyLoginService>();
+			builder.Services.AddScoped<IPokemonService, PokemonService>();
+			builder.Services.AddScoped<IItemService, ItemService>();
 
 			await builder.Build().RunAsync();
 		}
