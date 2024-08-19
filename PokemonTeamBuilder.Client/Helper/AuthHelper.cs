@@ -9,16 +9,24 @@ namespace PokemonTeamBuilder.Client.Helper
 		private readonly ISessionStorageService _sessionStorageService;
 		private readonly ILocalStorageService _localStorageService;
 
-		public AuthHelper(ISessionStorageService sessionStorageService, ILocalStorageService localStorageService)
+		public AuthHelper(ISessionStorageService sessionStorageService, ILocalStorageService localStorageService, HttpClient httpCLient)
 		{
 			_sessionStorageService = sessionStorageService;
 			_localStorageService = localStorageService;
 		}
 		public async void StoreToken(LoginResultDto token)
 		{
-			await _sessionStorageService.SetItemAsync("JwtToken", token.JwtToken);
-			await _sessionStorageService.SetItemAsync("RefreshToken", token.RefreshToken);
-			await _localStorageService.SetItemAsync("UserName", token.UserName);
+			try
+			{
+				await _sessionStorageService.SetItemAsync("JwtToken", token.JwtToken);
+				await _sessionStorageService.SetItemAsync("RefreshToken", token.RefreshToken);
+				await _sessionStorageService.SetItemAsync("UserName", token.UserName);
+				
+			}
+			catch(Exception e)
+			{
+				Console.WriteLine(e.Message);
+			}
 		}
 
 
@@ -36,7 +44,7 @@ namespace PokemonTeamBuilder.Client.Helper
 
 		public async Task<string> GetUserName()
 		{
-			var userName = await _localStorageService.GetItemAsync<string>("UserName");
+			var userName = await _sessionStorageService.GetItemAsync<string>("UserName");
 			return userName;
 		}
 	}

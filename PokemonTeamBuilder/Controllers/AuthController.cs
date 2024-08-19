@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using Shared_Library;
 using Shared_Library.Data;
 using Shared_Library.Dto;
+using Shared_Library.Enum;
 using Shared_Library.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.WebSockets;
@@ -15,7 +15,7 @@ using System.Text;
 
 namespace PokedexAppUseRedis.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class AuthController : ControllerBase
 	{
@@ -181,9 +181,9 @@ namespace PokedexAppUseRedis.Controllers
 				{
 					new Claim(ClaimTypes.Name, user.UserName),
 				}),
-				
+
 				Issuer = _config.GetSection("Jwt:Issuer").Value,
-				Expires = DateTime.Now.AddSeconds(30),
+				Expires = DateTime.Now.AddMinutes(5),
 				SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
 			};
 

@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Shared_Library;
+using Shared_Library.Enum;
 using StackExchange.Redis;
 
 namespace PokedexAppUseRedis.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleEnum.Admin))]
 	public class RedisExampleController : ControllerBase

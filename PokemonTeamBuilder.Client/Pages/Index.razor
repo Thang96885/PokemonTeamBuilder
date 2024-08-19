@@ -1,23 +1,31 @@
 ﻿@page "/"
 @using PokemonTeamBuilder.Client.Helper
+@using Shared_Library.Dto
 @using Shared_Library.Models
 
 @inject AuthHelper _authHelper
+@inject ITeamService _teamService
+@inject ISnackbar _snackbar
+@inject NavigationManager _navigationManager
+
 <PageTitle>Home page</PageTitle>
 
-<div class="d-flex m-5 justify-content-center align-items-center">
+<div class="d-flex m-5 justify-content-center align-items-center flex-column">
 	@if(userName != "" && Teams != null && Teams.Count() != 0)
 	{
 		foreach(var team in Teams)
 		{
-			<div class="d-block mx-auto pokemon-block">
+			<div class="d-flex mx-auto pokemon-block border-1 ">
 				<p class="m-1">@team.TeamName</p>
 				<div class="d-flex m-1 justify-content-center align-items-center">
-					@foreach(var pokemon in team.PokemonSetUps)
+					@if(team.PokemonSetUps != null && team.PokemonSetUps.Count() != 0)
 					{
-						<div class="d-inline-flex m-1">
-							<img src="@(rootPicUrl + pokemon.PokId + ".png")" height="30" width="30"/>
-						</div>
+						@foreach (var pokemon in team.PokemonSetUps)
+						{
+							<div class="d-inline-flex m-1">
+								<img src="@(rootPicUrl + pokemon.PokId + ".png")" height="30" width="30" />
+							</div>
+						}
 					}
 				</div>
 			</div>
@@ -33,9 +41,7 @@
 
 
 <div class="d-flex justify-content-center align-items-center">
-	<a href="/setup-team">
-		<MudButton Variant="Variant.Filled" Color="Color.Primary">Add team</MudButton>
-	</a>
+	<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddNewTeam">Add team</MudButton>
 </div>
 
 
@@ -44,7 +50,40 @@
 
 @code
 {
-	ICollection<Team> Teams { get; set; }
+	IEnumerable<Team> Teams { get; set; }
 	string userName = "";
 	string rootPicUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/";
+	protected override async Task OnInitializedAsync()
+	{
+		userName = await _authHelper.GetUserName();
+		if(!String.IsNullOrEmpty(userName))
+		{
+			Teams = await _teamService.GetAllTeam(userName);
+		}
+	}
+	private async Task OnAddNewTeam()
+	{
+		if(String.IsNullOrEmpty(userName))
+		{
+			_snackbar.Add("Please login first", Severity.Error);
+			return;
+		}
+		var teamCreateInfo = new TeamCreateRequestDto
+			{
+				TeamName = "My new team",
+				UserName = userName,
+			};
+		var createTeamResult = await _teamService.AddNewTeam(teamCreateInfo);
+		if(createTeamResult.IsSuccess)
+		{
+			_snackbar.Add("Team created successfully", Severity.Success);
+			var queryParameters = new Dictionary<string, object>
+			{
+				{"IsUpdate", "true"},
+				{"TeamId", createTeamResult.Team.Id.ToString()}
+			};
+			_navigationManager.NavigateTo(_navigationManager.GetUriWithQueryParameters("/setup-team",queryParameters));
+		}
+		_snackbar.Add("Failed to create team", Severity.Error);
+	}
 }

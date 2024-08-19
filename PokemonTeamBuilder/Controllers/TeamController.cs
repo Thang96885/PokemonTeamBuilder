@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PokemonTeamBuilder.Api.Repositories;
+using Shared_Library;
 using Shared_Library.Data;
 using Shared_Library.Dto;
 using Shared_Library.Models;
@@ -12,6 +15,7 @@ namespace PokemonTeamBuilder.Api.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 	public class TeamController : ControllerBase
 	{
 		private readonly PokemonTeamBuilderContext _context;
@@ -29,13 +33,30 @@ namespace PokemonTeamBuilder.Api.Controllers
 			_unitOfWork = unitOfWork;
 		}
 
+		[HttpGet("/GetAllTeam")]
+		public async Task<IActionResult> GetAllTeam([FromQuery] string userName)
+		{
+			var user = await _userManager.FindByNameAsync(userName);
+			var team = await _unitOfWork.TeamRepository.GetAllTeamBasicInfoAsync(user.Id);
+			if(team == null)
+			{
+				return NotFound();
+			}
+			return Ok(team);
+		}
+
 		[HttpPost("/CreateTeam")] 
 		public async Task<IActionResult> CreateNewTeam([FromBody] TeamCreateRequestDto teamInfo)
 		{
+			var result = new TeamCreateResultDto
+			{
+				IsSuccess = false,
+				ErrorMessage = "Create team failed",
+			};
 			var user = await _userManager.FindByNameAsync(teamInfo.UserName);
 			if(user == null)
 			{
-				return BadRequest("User not fould");
+				return BadRequest(result);
 			}
 			var team = new Team
 			{
@@ -43,8 +64,16 @@ namespace PokemonTeamBuilder.Api.Controllers
 				User = user,
 			};
 			_unitOfWork.TeamRepository.CreateNewTeam(team);
-			var result = await _unitOfWork.SaveChangeAsync();
-			return Ok();
+			var saveResult = await _unitOfWork.SaveChangeAsync();
+			if(saveResult == 0)
+			{
+				return BadRequest(result);
+			}
+			team.User = null;
+			result.IsSuccess = true;
+			result.Team = team;
+			result.ErrorMessage = "";
+			return Ok(result);
 		}
 
 		[HttpPost("/AddPokemonSetupToTeam")]

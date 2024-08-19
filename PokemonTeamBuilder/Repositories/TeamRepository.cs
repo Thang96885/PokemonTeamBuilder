@@ -19,9 +19,9 @@ namespace PokemonTeamBuilder.Api.Repositories
 			_context.Add(team);
 		}
 
-		public async Task<IEnumerable<Team>> GetAllTeamBasicInfoAsync(string userName)
+		public async Task<IEnumerable<Team>> GetAllTeamBasicInfoAsync(int userId)
 		{
-			var teams = await _context.Teams.Where(t => t.User.UserName == userName).AsNoTracking().ToListAsync();
+			var teams = await _context.Teams.Where(t => t.UserId == userId).AsNoTracking().ToListAsync();
 			return teams;
 		}
 

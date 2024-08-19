@@ -12,48 +12,52 @@
 
 <div class="d-flex flex-md-wrap flex-column">
 	
-		<div class="d-flex flex-md-wrap w-50">
-			@foreach (var pokemonChoose in PokemonChooses)
-			{
-		
-				<div class="d-flex flex-row border-1 m-2 rounded-1" style="height: 280px; width: 300px">
-					<div class="d-flex flex-column w-50">
-						<div>
-							<MudAutocomplete T="string" Label="Name" @bind-Value="pokemonChoose.PokemonName" MaxItems="null"
-												SearchFuncWithCancel="async (search, token) => {return  await PokemonSearchHelper<Pokemon>.SearchName(search, pokemonList.Results, token);}" TextChanged="OnSelectPokemon"
-							></MudAutocomplete>
-						</div>
-						<div class="d-flex align-items-center justify-content-center m-2" style="height: 80px">
-							@if(string.IsNullOrEmpty(pokemonChoose.PicUrl))
-							{
-								<img src="/Pic/question.png" height="66" width="84"/>
-							}
-							else
-							{
-								<img src="@pokemonChoose.PicUrl" height="60" width="60"/>
-							}
-						</div>
-						<MudAutocomplete MaxHeight="35" T="string" @bind-Value="pokemonChoose.ItemName" Label="Item"
-						SearchFuncWithCancel="async (search, token) => {return await PokemonSearchHelper<Item>.SearchName(search, ItemList.Results, token);}"
-							></MudAutocomplete>
-						
-					</div>
-					<div class="d-flex flex-column w-50">
-						@foreach (var pokemonMove in pokemonChoose.Moves)
-						{
-							<div class="d-flex flex-grow-1">
-							<MudAutocomplete T="string" @bind-Value="pokemonMove.Name" Label="Move"
-											 SearchFuncWithCancel="async (search, token) => {return await PokemonSearchHelper<Move>.SearchName(search, PokemonInfo[FindIndexHasPokName(pokemonChoose.PokemonName)].Moves.Select(m => m.Move).ToList(), token);}"></MudAutocomplete>
+		<div class="d-flex w-50 flex-column">
+			<div class="d-flex flex-md-wrap">
+				@foreach (var pokemonChoose in PokemonChooses)
+				{
+
+					<div class="d-flex flex-row border-1 m-2 rounded-1" style="height: 280px; width: 300px">
+						<div class="d-flex flex-column w-50">
+							<div>
+								<MudAutocomplete T="string" Label="Name" @bind-Value="pokemonChoose.PokemonName" MaxItems="null"
+												 SearchFuncWithCancel="async (search, token) => {return  await PokemonSearchHelper<Pokemon>.SearchName(search, pokemonList.Results, token);}" TextChanged="OnSelectPokemon"></MudAutocomplete>
 							</div>
-							
-						}
-						<div class="d-flex flex-grow-1">
-							<MudAutocomplete T="string" @bind-Value="pokemonChoose.AbilityName" Label="Ability"
-										 SearchFuncWithCancel="async (search, token) => {return await PokemonSearchHelper<Ability>.SearchName(search, PokemonInfo[FindIndexHasPokName(pokemonChoose.PokemonName)].Abilities.Select(a => a.Ability).ToList(), token);}"></MudAutocomplete>
+							<div class="d-flex align-items-center justify-content-center m-2" style="height: 80px">
+								@if (string.IsNullOrEmpty(pokemonChoose.PicUrl))
+								{
+									<img src="/Pic/question.png" height="66" width="84" />
+								}
+								else
+								{
+									<img src="@pokemonChoose.PicUrl" height="60" width="60" />
+								}
+							</div>
+							<MudAutocomplete MaxHeight="35" T="string" @bind-Value="pokemonChoose.ItemName" Label="Item"
+											 SearchFuncWithCancel="async (search, token) => {return await PokemonSearchHelper<Item>.SearchName(search, ItemList.Results, token);}"></MudAutocomplete>
+
+						</div>
+						<div class="d-flex flex-column w-50">
+							@foreach (var pokemonMove in pokemonChoose.Moves)
+							{
+								<div class="d-flex flex-grow-1">
+									<MudAutocomplete T="string" @bind-Value="pokemonMove.Name" Label="Move"
+													 SearchFuncWithCancel="async (search, token) => {return await PokemonSearchHelper<Move>.SearchName(search, PokemonInfo[FindIndexHasPokName(pokemonChoose.PokemonName)].Moves.Select(m => m.Move).ToList(), token);}"></MudAutocomplete>
+								</div>
+
+							}
+							<div class="d-flex flex-grow-1">
+								<MudAutocomplete T="string" @bind-Value="pokemonChoose.AbilityName" Label="Ability"
+												 SearchFuncWithCancel="async (search, token) => {return await PokemonSearchHelper<Ability>.SearchName(search, PokemonInfo[FindIndexHasPokName(pokemonChoose.PokemonName)].Abilities.Select(a => a.Ability).ToList(), token);}"></MudAutocomplete>
+							</div>
 						</div>
 					</div>
-				</div>
-			}
+				}
+			</div>
+
+			<div class="d-flex justify-content-end">
+				<MudButton Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit">Save</MudButton>
+			</div>
 		</div>
 		
 
@@ -64,6 +68,13 @@
 </div>
 
 @code {
+	[Parameter]
+	[SupplyParameterFromQuery(Name ="IsUpdate")]
+	public bool IsUpdate { get; set; }
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "TeamId")]
+	public int TeamId { get; set; }
+
 	List<PokemonSetUp> PokemonChooses { get; set; }
 	List<Pokemon> PokemonInfo { get; set; }
 
@@ -86,7 +97,7 @@
 
 	private async Task<IEnumerable<string>> SearchPokemonName(string searchText, CancellationToken token)
 	{
-		await Task.Delay(10, token);
+		await Task.Delay(5, token);
 
 		var result = await Task.Run(() =>
 		{
@@ -107,8 +118,9 @@
 			int index = FindIndexHasPokName(PokName);
 			PokemonInfo[index] = await _pokemonService.GetPokemonInfoByNameAsync(PokName);
 			PokemonChooses[index].PicUrl = $"https://play.pokemonshowdown.com/sprites/ani/{PokemonInfo[index].Name.ToLower()}.gif";
+			PokemonChooses[index].Types = PokemonInfo[index].Types.Select(t => new TypeDto {Name = t.Type.Name }).ToList();
 		}
-		
+
 	}
 
 	private bool CheckPokemonName(string PokName)
@@ -134,4 +146,7 @@
 		}
 		return -1;
 	}
+
+
+	
 }

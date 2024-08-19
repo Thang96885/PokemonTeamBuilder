@@ -21,8 +21,8 @@ namespace PokemonTeamBuilder.Client.Services
         public async Task<LoginResultDto> Login(LoginRequestDto loginInfo)
         {
             var respone = await _httpClient.PostAsJsonAsync("api/Auth/login", loginInfo);
-
             var result = await respone.Content.ReadFromJsonAsync<LoginResultDto>();
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", result.JwtToken);
             return result;
         }
 

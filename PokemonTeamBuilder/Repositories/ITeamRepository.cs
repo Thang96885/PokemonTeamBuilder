@@ -4,7 +4,7 @@ namespace PokemonTeamBuilder.Api.Repositories
 {
 	public interface ITeamRepository
 	{
-		public Task<IEnumerable<Team>> GetAllTeamBasicInfoAsync(string userName);
+		public Task<IEnumerable<Team>> GetAllTeamBasicInfoAsync(int userId);
 		public void CreateNewTeam(Team team);
 
 		public void UpdateTeam(Team team);
