@@ -3,25 +3,27 @@ using PokeApiNet;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace Shared_Library.Models
 {
-    public class PokemonMoveChoose
+    public partial class PokemonMoveChoose
     {
         [Key]
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
-		[Required]
-		public string Url { get; set; }
         public int? Power { get; set; }
 		[Required]
 		public TypeDto Type { get; set; }
-        [Required]
         public PokemonSetUp PokemonSetUp { get; set; }
+    }
+
+
+    public partial class  PokemonMoveChoose
+    {
+        [NotMapped]
+        public bool IsValid { get; set; }
     }
 }

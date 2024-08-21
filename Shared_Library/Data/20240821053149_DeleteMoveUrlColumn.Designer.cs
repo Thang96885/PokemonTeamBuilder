@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shared_Library.Data;
 
@@ -11,9 +12,10 @@ using Shared_Library.Data;
 namespace Shared_Library.Data
 {
     [DbContext(typeof(PokemonTeamBuilderContext))]
-    partial class PokemonTeamBuilderContextModelSnapshot : ModelSnapshot
+    [Migration("20240821053149_DeleteMoveUrlColumn")]
+    partial class DeleteMoveUrlColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

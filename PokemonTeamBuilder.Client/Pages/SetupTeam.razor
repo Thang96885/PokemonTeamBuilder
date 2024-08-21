@@ -1,10 +1,13 @@
 ﻿@page "/setup-team"
 @using PokeApiNet
 @using PokemonTeamBuilder.Client.Helper
+@using Shared_Library.Dto
 @using Shared_Library.Models
 
 @inject IPokemonService _pokemonService;
 @inject IItemService _itemService;
+@inject ITeamService _teamService;
+@inject IMoveService _moveService;
 
 <div class="d-flex align-items-center justify-content-center m-4">
 	<h1>MY POKEMON TEAM</h1>
@@ -20,7 +23,7 @@
 					<div class="d-flex flex-row border-1 m-2 rounded-1" style="height: 280px; width: 300px">
 						<div class="d-flex flex-column w-50">
 							<div>
-								<MudAutocomplete T="string" Label="Name" @bind-Value="pokemonChoose.PokemonName" MaxItems="null"
+								<MudAutocomplete T="string" Label="Name" @bind-Value="pokemonChoose.PokemonName"
 												 SearchFuncWithCancel="async (search, token) => {return  await PokemonSearchHelper<Pokemon>.SearchName(search, pokemonList.Results, token);}" TextChanged="OnSelectPokemon"></MudAutocomplete>
 							</div>
 							<div class="d-flex align-items-center justify-content-center m-2" style="height: 80px">
@@ -56,7 +59,7 @@
 			</div>
 
 			<div class="d-flex justify-content-end">
-				<MudButton Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit">Save</MudButton>
+				<MudButton OnClick="OnSave" Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit">Save</MudButton>
 			</div>
 		</div>
 		
@@ -113,12 +116,19 @@
 
 	private async Task OnSelectPokemon(string PokName)
 	{
+		int index = FindIndexHasPokName(PokName);
 		if(CheckPokemonName(PokName))
 		{
-			int index = FindIndexHasPokName(PokName);
+
 			PokemonInfo[index] = await _pokemonService.GetPokemonInfoByNameAsync(PokName);
 			PokemonChooses[index].PicUrl = $"https://play.pokemonshowdown.com/sprites/ani/{PokemonInfo[index].Name.ToLower()}.gif";
 			PokemonChooses[index].Types = PokemonInfo[index].Types.Select(t => new TypeDto {Name = t.Type.Name }).ToList();
+			PokemonChooses[index].PokId = PokemonInfo[index].Id;
+			PokemonChooses[index].IsValid = true;
+		}
+		else
+		{
+			PokemonChooses[index].IsValid = false;
 		}
 
 	}
@@ -147,6 +157,45 @@
 		return -1;
 	}
 
+	private async Task<PokemonMoveChoose> CheckMoveValid(string name)
+	{
+		var result = await _moveService.GetMoveByName(name);
+		return result;
+	}
 
-	
+	private async Task OnSave()
+	{
+		var info = new AddPokemonSetupRequest
+		{
+			TeamId = TeamId,
+		};
+		var pokemonsSelected = new List<PokemonSetUp>();
+		for(int i = 0; i < 6; i++)
+		{
+
+			if(PokemonChooses[i].IsValid != null && PokemonChooses[i].IsValid == true)
+			{
+				PokemonSetUp pokemon = new PokemonSetUp 
+				{
+					PokemonName = PokemonChooses[i].PokemonName,
+					PokId = PokemonChooses[i].PokId,
+					ItemName = PokemonChooses[i].ItemName,
+					AbilityName = PokemonChooses[i].AbilityName,
+					Moves = new List<PokemonMoveChoose>(),
+				};
+				foreach(var move in PokemonChooses[i].Moves)
+				{
+					var moveInfo = await CheckMoveValid(move.Name);
+					if(moveInfo != null)
+					{
+						pokemon.Moves.Add(moveInfo);
+					}
+				}
+				pokemonsSelected.Add(pokemon);
+			}
+		}
+		info.PokemonSetupList = pokemonsSelected;
+		await _teamService.UpdateTeam(info);
+	}
+
 }

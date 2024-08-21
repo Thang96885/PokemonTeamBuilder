@@ -9,7 +9,7 @@ namespace PokemonTeamBuilder.Client.Services
 	{
 		public Task<IEnumerable<Team>> GetAllTeam(string userName);
 		public Task<TeamCreateResultDto> AddNewTeam(TeamCreateRequestDto info);
-		public Task<bool> UpdateTeam(string userName, Team team); 
+		public Task<bool> UpdateTeam(AddPokemonSetupRequest info); 
 
 	}
 	public class TeamService : ITeamService
@@ -28,7 +28,6 @@ namespace PokemonTeamBuilder.Client.Services
 			try
 			{
 				var response = await _client.PostAsJsonAsync<TeamCreateRequestDto>("/CreateTeam", info);
-				var stringResult = await response.Content.ReadAsStringAsync();
 				var result = await response.Content.ReadFromJsonAsync<TeamCreateResultDto>();
 				return result;	
 			}
@@ -66,9 +65,18 @@ namespace PokemonTeamBuilder.Client.Services
 			}
 		}
 
-		public Task<bool> UpdateTeam(string userName, Team team)
+		public async Task<bool> UpdateTeam(AddPokemonSetupRequest info)
 		{
-			throw new NotImplementedException();
+			var response = await _client.PostAsJsonAsync<AddPokemonSetupRequest>("/AddPokemonSetup", info);
+			if(response.StatusCode == System.Net.HttpStatusCode.OK)
+			{
+				return true;
+			}
+			else
+			{
+				var kq = await response.Content.ReadAsStringAsync();
+			}
+			return false;
 		}
 	}
 }

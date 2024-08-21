@@ -84,6 +84,10 @@
 			};
 			_navigationManager.NavigateTo(_navigationManager.GetUriWithQueryParameters("/setup-team",queryParameters));
 		}
-		_snackbar.Add("Failed to create team", Severity.Error);
+		else
+		{
+			_snackbar.Add("Failed to create team", Severity.Error);
+		}
+		
 	}
 }

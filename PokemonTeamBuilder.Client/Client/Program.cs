@@ -30,6 +30,7 @@ namespace PokemonTeamBuilder.Client
 			builder.Services.AddScoped<IPokemonService, PokemonService>();
 			builder.Services.AddScoped<IItemService, ItemService>();
 			builder.Services.AddScoped<ITeamService, TeamService>();
+			builder.Services.AddScoped<IMoveService, MoveService>();
 
 			await builder.Build().RunAsync();
 		}

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shared_Library.Data;
 
@@ -11,9 +12,10 @@ using Shared_Library.Data;
 namespace Shared_Library.Data
 {
     [DbContext(typeof(PokemonTeamBuilderContext))]
-    partial class PokemonTeamBuilderContextModelSnapshot : ModelSnapshot
+    [Migration("20240820170609_ChangeNullableProperty")]
+    partial class ChangeNullableProperty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -161,11 +163,18 @@ namespace Shared_Library.Data
                     b.Property<int>("TypeId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PokemonSetUpId");
 
                     b.HasIndex("TypeId");
+
+                    b.HasIndex("Url")
+                        .IsUnique();
 
                     b.ToTable("Moves");
                 });
@@ -182,6 +191,10 @@ namespace Shared_Library.Data
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ItemName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PicUrl")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PokId")

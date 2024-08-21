@@ -76,13 +76,20 @@ namespace PokemonTeamBuilder.Api.Controllers
 			return Ok(result);
 		}
 
-		[HttpPost("/AddPokemonSetupToTeam")]
+		[HttpPost("/AddPokemonSetup")]
 		public async Task<IActionResult> AddPokemonSetupToTeam([FromBody] AddPokemonSetupRequest requestInfo)
 		{
 			var team = await _unitOfWork.TeamRepository.GetTeamAsync(requestInfo.TeamId);
 			if (team == null)
 			{
 				return NotFound();
+			}
+			foreach(var pokemon in requestInfo.PokemonSetupList)
+			{
+				foreach(var type in pokemon.Types)
+				{
+					type.Id = (await _unitOfWork.TypeRepository.GetTypeByName(type.Name)).Id;
+				}	
 			}
 
 			await _unitOfWork.PokemonSetupRepository.AddPokemonSetupToTeam(requestInfo.PokemonSetupList, team.Id);

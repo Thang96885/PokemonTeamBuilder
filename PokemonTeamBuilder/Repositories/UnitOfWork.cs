@@ -17,6 +17,7 @@ namespace PokemonTeamBuilder.Api.Repositories
 		private ITeamRepository _teamRepository;
 		private IPokemonSetupRepository _pokemonSetupRepository;
 		private IPokemonMoveChooseRepository _pokemonMoveChooseRepository;
+		private IPokTypeRepository _typeRepository;
 
 		public ITeamRepository TeamRepository { get
 			{
@@ -50,6 +51,19 @@ namespace PokemonTeamBuilder.Api.Repositories
 				return _pokemonMoveChooseRepository;
 			}
 		}
+
+		public IPokTypeRepository TypeRepository
+		{
+			get
+			{
+				if (_typeRepository == null)
+				{
+					_typeRepository = new PokTypeRepository(_context);
+				}
+				return _typeRepository;
+			}
+		}
+
 		public int SaveChange()
 		{
 			try

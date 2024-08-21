@@ -17,9 +17,9 @@ namespace Shared_Library.Models
         public int TeamId { get; set; }
         public int PokId { get; set; }
         public string PokemonName { get; set; }
-        public string AbilityName { get; set; }
-        public string ItemName { get; set; }
-        public IList<PokemonMoveChoose> Moves { get; set; }
+        public string? AbilityName { get; set; }
+        public string? ItemName { get; set; }
+        public IList<PokemonMoveChoose>? Moves { get; set; }
         public IList<TypeDto> Types { get; set; }
 
         public Team Team { get; set; }
@@ -27,7 +27,11 @@ namespace Shared_Library.Models
 
     public partial class PokemonSetUp
     {
-        public string PicUrl { get; set; }
+        [NotMapped]
+        public string? PicUrl { get; set; }
+
+        [NotMapped]
+        public bool? IsValid { get; set; }
 
         public PokemonSetUp()
 		{
