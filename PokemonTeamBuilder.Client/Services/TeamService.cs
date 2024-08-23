@@ -9,7 +9,9 @@ namespace PokemonTeamBuilder.Client.Services
 	{
 		public Task<IEnumerable<Team>> GetAllTeam(string userName);
 		public Task<TeamCreateResultDto> AddNewTeam(TeamCreateRequestDto info);
-		public Task<bool> UpdateTeam(AddPokemonSetupRequest info); 
+		public Task<bool> UpdateTeam(AddPokemonSetupRequest info);
+
+		public Task<ICollection<PokemonSetUp>> GetPokemonSetupInTeam(int teamId);
 
 	}
 	public class TeamService : ITeamService
@@ -64,6 +66,27 @@ namespace PokemonTeamBuilder.Client.Services
 				return new List<Team>();
 			}
 		}
+
+		public async Task<ICollection<PokemonSetUp>> GetPokemonSetupInTeam(int teamId)
+		{
+			try
+			{
+				_client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await _authHelper.GetJwtToken());
+				var response = await _client.GetAsync("/GetPokemonSetupInTeam?teamId=" + teamId);
+				if (response.StatusCode == System.Net.HttpStatusCode.OK)
+				{
+					return await response.Content.ReadFromJsonAsync<ICollection<PokemonSetUp>>();
+				}
+				else
+				{
+					return new List<PokemonSetUp>();
+				}
+			}
+			catch (Exception e)
+			{
+				return new List<PokemonSetUp>();
+			}
+        }
 
 		public async Task<bool> UpdateTeam(AddPokemonSetupRequest info)
 		{

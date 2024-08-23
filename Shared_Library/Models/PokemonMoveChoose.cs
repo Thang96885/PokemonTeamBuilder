@@ -17,7 +17,7 @@ namespace Shared_Library.Models
         public int? Power { get; set; }
 		[Required]
 		public TypeDto Type { get; set; }
-        public PokemonSetUp PokemonSetUp { get; set; }
+        public PokemonSetUp? PokemonSetUp { get; set; }
     }
 
 

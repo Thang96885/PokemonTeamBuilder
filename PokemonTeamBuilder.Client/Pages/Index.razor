@@ -15,15 +15,17 @@
 	{
 		foreach(var team in Teams)
 		{
-			<div class="d-flex mx-auto pokemon-block border-1 ">
-				<p class="m-1">@team.TeamName</p>
-				<div class="d-flex m-1 justify-content-center align-items-center">
+			<div class="d-flex mx-auto m-2 flex-row" onclick="@(() => {OnTeamClick(team.Id);})">
+				<div class="d-flex align-items-center">
+					<p class="m-1">@team.TeamName</p>
+				</div>
+				<div class="d-block m-1 align-items-center border-1" style="height: 60px; width: 400px">
 					@if(team.PokemonSetUps != null && team.PokemonSetUps.Count() != 0)
 					{
 						@foreach (var pokemon in team.PokemonSetUps)
 						{
 							<div class="d-inline-flex m-1">
-								<img src="@(rootPicUrl + pokemon.PokId + ".png")" height="30" width="30" />
+								<img src="@(rootPicUrl + pokemon.PokId + ".png")"  width="50" />
 							</div>
 						}
 					}
@@ -79,7 +81,7 @@
 			_snackbar.Add("Team created successfully", Severity.Success);
 			var queryParameters = new Dictionary<string, object>
 			{
-				{"IsUpdate", "true"},
+				{"IsUpdate", "false"},
 				{"TeamId", createTeamResult.Team.Id.ToString()}
 			};
 			_navigationManager.NavigateTo(_navigationManager.GetUriWithQueryParameters("/setup-team",queryParameters));
@@ -88,6 +90,15 @@
 		{
 			_snackbar.Add("Failed to create team", Severity.Error);
 		}
-		
+	}
+
+	private void OnTeamClick(int teamId)
+	{
+		var queryParameters = new Dictionary<string, object>
+			{
+				{"IsUpdate", "true"},
+				{"TeamId", teamId.ToString()}
+			};
+		_navigationManager.NavigateTo(_navigationManager.GetUriWithQueryParameters("/setup-team", queryParameters), forceLoad:true);
 	}
 }

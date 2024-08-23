@@ -19,6 +19,7 @@ namespace PokemonTeamBuilder.Client
 			builder.Services.AddScoped(HttpClient => new HttpClient { BaseAddress = new Uri(builder.Configuration.GetSection("HttpRootApi").Value)});
 			//builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 			builder.Services.AddMudServices();
+			builder.Services.AddMudExtensions();
 
 			builder.Services.AddScoped<IAuthService, AuthService>();
 			builder.Services.AddBlazoredLocalStorage();
@@ -31,6 +32,8 @@ namespace PokemonTeamBuilder.Client
 			builder.Services.AddScoped<IItemService, ItemService>();
 			builder.Services.AddScoped<ITeamService, TeamService>();
 			builder.Services.AddScoped<IMoveService, MoveService>();
+			builder.Services.AddScoped<CustomMapper>();
+
 
 			await builder.Build().RunAsync();
 		}

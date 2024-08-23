@@ -6,6 +6,7 @@ namespace PokemonTeamBuilder.Client.Helper
 	{
 		public static async Task<IEnumerable<string>> SearchName(string searchName, List<NamedApiResource<T>> ItemList, CancellationToken token)
 		{
+			await Task.Delay(5, token);
 			return await Task.Run<IEnumerable<string>>(() =>
 			{
 				if (string.IsNullOrEmpty(searchName))

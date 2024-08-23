@@ -1,4 +1,5 @@
 ﻿@page "/setup-team"
+@using MudExtensions.Services
 @using PokeApiNet
 @using PokemonTeamBuilder.Client.Helper
 @using Shared_Library.Dto
@@ -8,6 +9,8 @@
 @inject IItemService _itemService;
 @inject ITeamService _teamService;
 @inject IMoveService _moveService;
+@inject ISnackbar _snackbar;
+@inject CustomMapper _mapper;
 
 <div class="d-flex align-items-center justify-content-center m-4">
 	<h1>MY POKEMON TEAM</h1>
@@ -17,14 +20,18 @@
 	
 		<div class="d-flex w-50 flex-column">
 			<div class="d-flex flex-md-wrap">
+			@if(PokemonChooses != null)
+			{
 				@foreach (var pokemonChoose in PokemonChooses)
 				{
 
 					<div class="d-flex flex-row border-1 m-2 rounded-1" style="height: 280px; width: 300px">
 						<div class="d-flex flex-column w-50">
 							<div>
-								<MudAutocomplete T="string" Label="Name" @bind-Value="pokemonChoose.PokemonName"
-												 SearchFuncWithCancel="async (search, token) => {return  await PokemonSearchHelper<Pokemon>.SearchName(search, pokemonList.Results, token);}" TextChanged="OnSelectPokemon"></MudAutocomplete>
+								@* <MudAutocomplete T="string" Label="Name" @bind-Value="pokemonChoose.PokemonName"
+						SearchFunc="SearchPokemonName" TextChanged="OnSelectPokemon"></MudAutocomplete> *@
+								<MudSelectExtended T="string" Label="Name" @bind-Value="pokemonChoose.PokemonName" SelectedValuesChanged="OnSelectPokemon"
+												   SearchBox="true" SearchBoxAutoFocus="true" ItemCollection="pokemonNameList" SearchFunc="SearchPokemonName"></MudSelectExtended>
 							</div>
 							<div class="d-flex align-items-center justify-content-center m-2" style="height: 80px">
 								@if (string.IsNullOrEmpty(pokemonChoose.PicUrl))
@@ -56,7 +63,14 @@
 						</div>
 					</div>
 				}
-			</div>
+			}
+			else
+			{
+				<div class="d-flex justify-content-center">
+					<p>Loading</p>
+				</div>
+			}
+		</div>
 
 			<div class="d-flex justify-content-end">
 				<MudButton OnClick="OnSave" Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit">Save</MudButton>
@@ -81,63 +95,90 @@
 	List<PokemonSetUp> PokemonChooses { get; set; }
 	List<Pokemon> PokemonInfo { get; set; }
 
-	NamedApiResourceList<Pokemon> pokemonList { get; set; }
+
+	ICollection<string> pokemonNameList { get; set; }
+
 	NamedApiResourceList<Item> ItemList { get; set; }
 	protected override async Task OnInitializedAsync()
 	{
-		PokemonChooses = new List<PokemonSetUp>();
-		PokemonInfo = new List<Pokemon>();
-		for(int i = 0; i < 6; i++)
+		if(IsUpdate == true)
 		{
-			PokemonChooses.Add(new PokemonSetUp());
-			PokemonInfo.Add(new Pokemon());
-		}
+			var pokemonTeam = (await _teamService.GetPokemonSetupInTeam(TeamId))!.ToList();
+			PokemonChooses = pokemonTeam;
+			PokemonInfo = new List<Pokemon>();
+			int numberOfPokemonSetup = PokemonChooses.Count();
 
-		pokemonList = await _pokemonService.GetAllPokemonAsync();
-		ItemList = await _itemService.GetAllItemsAsync();
-	}
-
-
-	private async Task<IEnumerable<string>> SearchPokemonName(string searchText, CancellationToken token)
-	{
-		await Task.Delay(5, token);
-
-		var result = await Task.Run(() =>
-		{
-			if (string.IsNullOrEmpty(searchText))
+			foreach(var pokemon in PokemonChooses)
 			{
-				return pokemonList.Results.Select(p => p.Name);
+				PokemonInfo.Add(await _pokemonService.GetPokemonInfoByNameAsync(pokemon.PokemonName));
+				pokemon.PicUrl = $"https://play.pokemonshowdown.com/sprites/ani/{pokemon.PokemonName.ToLower()}.gif";
 			}
 
-			return pokemonList.Results.Where(p => p.Name.ToLower().Contains(searchText.ToLower())).Select(p => p.Name);
-		});
-		return result.ToList();
-	}
+			for(int i = 0; i < 6 - numberOfPokemonSetup; i++)
+			{
+				PokemonChooses.Add(new PokemonSetUp());
+				PokemonInfo.Add(new Pokemon());
+			}
 
-	private async Task OnSelectPokemon(string PokName)
-	{
-		int index = FindIndexHasPokName(PokName);
-		if(CheckPokemonName(PokName))
-		{
+			for(int numberPokSlot = 0; numberPokSlot < 6; numberPokSlot++)
+			{
+				int numberCurrentMove = PokemonChooses[numberPokSlot].Moves.Count();
+				for(int numberMoveSlot = 0; numberMoveSlot < 4 - numberCurrentMove; numberCurrentMove++)
+				{
+					PokemonChooses[numberPokSlot].Moves.Add(new PokemonMoveChoose());
+				}
+			}
 
-			PokemonInfo[index] = await _pokemonService.GetPokemonInfoByNameAsync(PokName);
-			PokemonChooses[index].PicUrl = $"https://play.pokemonshowdown.com/sprites/ani/{PokemonInfo[index].Name.ToLower()}.gif";
-			PokemonChooses[index].Types = PokemonInfo[index].Types.Select(t => new TypeDto {Name = t.Type.Name }).ToList();
-			PokemonChooses[index].PokId = PokemonInfo[index].Id;
-			PokemonChooses[index].IsValid = true;
+			pokemonNameList = (await _pokemonService.GetAllPokemonAsync()).Results.Select(p => p.Name).ToList();
+			ItemList = await _itemService.GetAllItemsAsync();
 		}
 		else
 		{
-			PokemonChooses[index].IsValid = false;
+			PokemonChooses = new List<PokemonSetUp>();
+			PokemonInfo = new List<Pokemon>();
+			for (int i = 0; i < 6; i++)
+			{
+				PokemonChooses.Add(new PokemonSetUp());
+				PokemonInfo.Add(new Pokemon());
+			}
+			pokemonNameList = (await _pokemonService.GetAllPokemonAsync()).Results.Select(p => p.Name).ToList();
+			ItemList = await _itemService.GetAllItemsAsync();
 		}
+
+	}
+
+
+	private bool SearchPokemonName(string value, string searchText)
+	{
+		if(String.IsNullOrEmpty(searchText))
+		{
+			return true;
+		}
+
+		if(value.Contains(searchText))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	private async Task OnSelectPokemon(IEnumerable<string> selectedValue)
+	{
+		var index = FindIndexHasPokName(selectedValue!.First());
+		PokemonInfo[index] = await _pokemonService.GetPokemonInfoByNameAsync(selectedValue!.First());
+		/* PokemonChooses[index].PicUrl = $"https://play.pokemonshowdown.com/sprites/ani/{PokemonInfo[index].Name.ToLower()}.gif";
+		PokemonChooses[index].Types = PokemonInfo[index].Types.Select(t => new TypeDto { Name = t.Type.Name }).ToList();
+		PokemonChooses[index].PokId = PokemonInfo[index].Id;
+		PokemonChooses[index].IsValid = true; */
+		PokemonChooses[index] = _mapper.MapPokemon(PokemonInfo[index]);
 
 	}
 
 	private bool CheckPokemonName(string PokName)
 	{
-		foreach(var pokemon in pokemonList.Results)
+		foreach(var pokemonName in pokemonNameList)
 		{
-			if(pokemon.Name == PokName)
+			if(pokemonName == PokName)
 			{
 				return true;
 			}
@@ -173,7 +214,7 @@
 		for(int i = 0; i < 6; i++)
 		{
 
-			if(PokemonChooses[i].IsValid != null && PokemonChooses[i].IsValid == true)
+			if(!String.IsNullOrEmpty(PokemonChooses[i].PokemonName))
 			{
 				PokemonSetUp pokemon = new PokemonSetUp 
 				{
@@ -191,11 +232,19 @@
 						pokemon.Moves.Add(moveInfo);
 					}
 				}
+				foreach(var type in PokemonChooses[i].Types)
+				{
+					pokemon.Types.Add(type);
+				}
 				pokemonsSelected.Add(pokemon);
 			}
 		}
 		info.PokemonSetupList = pokemonsSelected;
-		await _teamService.UpdateTeam(info);
+		var result = await _teamService.UpdateTeam(info);
+		if(result == true)
+		{
+			_snackbar.Add("Save successfully", Severity.Success);
+		}
 	}
 
 }

@@ -45,6 +45,18 @@ namespace PokemonTeamBuilder.Api.Controllers
 			return Ok(team);
 		}
 
+		[HttpGet("/GetPokemonSetupInTeam")]
+		public async Task<IActionResult> GetPokemonSetupInTeam([FromQuery] int teamId)
+		{
+			var pokemonSetup = await _unitOfWork.PokemonSetupRepository.GetPokemonSetupInTeam(teamId);
+			if(pokemonSetup == null)
+			{
+				return NotFound();
+			}	
+
+			return Ok(pokemonSetup);
+		}
+
 		[HttpPost("/CreateTeam")] 
 		public async Task<IActionResult> CreateNewTeam([FromBody] TeamCreateRequestDto teamInfo)
 		{

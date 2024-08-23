@@ -82,7 +82,6 @@ namespace PokemonTeamBuilder.Api.Repositories
 			try
 			{
 				return await _context.SaveChangesAsync();
-				
 			}
 			catch(Exception e)
 			{

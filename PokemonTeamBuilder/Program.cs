@@ -34,6 +34,7 @@ namespace PokedexAppUseRedis
 			builder.Services.AddDbContext<PokemonTeamBuilderContext>(options =>
 			{
 				options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+				options.EnableSensitiveDataLogging();
 			});
 
 			builder.Services.AddAuthentication(options =>
