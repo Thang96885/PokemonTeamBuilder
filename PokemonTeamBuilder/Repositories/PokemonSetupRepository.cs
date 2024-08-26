@@ -34,8 +34,13 @@ namespace PokemonTeamBuilder.Api.Repositories
 			foreach(var pokemonSetup in pokemonSetupList)
 			{
 				pokemonSetup.TeamId = teamId;
+				_context.Entry<PokemonSetUp>(pokemonSetup).State = EntityState.Added;
+				foreach(var move in pokemonSetup.Moves)
+				{
+					_context.Entry<PokemonMoveChoose>(move).State = EntityState.Added;
+				}
 			}
-			_context.PokemonSetUps.AddRange(pokemonSetupList);
+			
 		}
 
 		public async Task<IEnumerable<PokemonSetUp>> GetPokemonSetupInTeam(int teamId)

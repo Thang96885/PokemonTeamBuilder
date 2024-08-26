@@ -1,0 +1,5 @@
+﻿.custom-grid-contaner {
+    display: grid;
+    grid-template-rows: 5fr 5fr 2fr;
+    width: 100%
+}

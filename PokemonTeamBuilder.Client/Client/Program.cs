@@ -6,6 +6,7 @@ using PokemonTeamBuilder.Client.Services;
 using Blazored.LocalStorage;
 using Blazored.SessionStorage;
 using PokemonTeamBuilder.Client.Helper;
+using PokemonTeamBuilder.Client.Enums;
 
 namespace PokemonTeamBuilder.Client
 {
@@ -33,6 +34,7 @@ namespace PokemonTeamBuilder.Client
 			builder.Services.AddScoped<ITeamService, TeamService>();
 			builder.Services.AddScoped<IMoveService, MoveService>();
 			builder.Services.AddScoped<CustomMapper>();
+			builder.Services.AddScoped<TypeLogic>();
 
 
 			await builder.Build().RunAsync();

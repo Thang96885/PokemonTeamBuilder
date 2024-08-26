@@ -1,6 +1,7 @@
 ﻿@page "/setup-team"
 @using MudExtensions.Services
 @using PokeApiNet
+@using PokemonTeamBuilder.Client.Enums
 @using PokemonTeamBuilder.Client.Helper
 @using Shared_Library.Dto
 @using Shared_Library.Models
@@ -11,14 +12,15 @@
 @inject IMoveService _moveService;
 @inject ISnackbar _snackbar;
 @inject CustomMapper _mapper;
+@inject TypeLogic _typeLogic;
 
 <div class="d-flex align-items-center justify-content-center m-4">
 	<h1>MY POKEMON TEAM</h1>
 </div>
 
-<div class="d-flex flex-md-wrap flex-column">
+<div class="d-flex flex-md-wrap flex-row">
 	
-		<div class="d-flex w-50 flex-column">
+		<div class="d-inline-flex w-50 flex-column">
 			<div class="d-flex flex-md-wrap">
 			@if(PokemonChooses != null)
 			{
@@ -30,7 +32,7 @@
 							<div>
 								@* <MudAutocomplete T="string" Label="Name" @bind-Value="pokemonChoose.PokemonName"
 						SearchFunc="SearchPokemonName" TextChanged="OnSelectPokemon"></MudAutocomplete> *@
-								<MudSelectExtended T="string" Label="Name" @bind-Value="pokemonChoose.PokemonName" SelectedValuesChanged="OnSelectPokemon"
+								<MudSelectExtended T="string" Label="Name" @bind-Value="pokemonChoose.PokemonName" SelectedValuesChanged="OnSelectPokemon" 
 												   SearchBox="true" SearchBoxAutoFocus="true" ItemCollection="pokemonNameList" SearchFunc="SearchPokemonName"></MudSelectExtended>
 							</div>
 							<div class="d-flex align-items-center justify-content-center m-2" style="height: 80px">
@@ -51,7 +53,7 @@
 							@foreach (var pokemonMove in pokemonChoose.Moves)
 							{
 								<div class="d-flex flex-grow-1">
-									<MudAutocomplete T="string" @bind-Value="pokemonMove.Name" Label="Move"
+									<MudAutocomplete T="string" @bind-Value="pokemonMove.Name"  Label="Move" TextChanged="async (moveChange) => {await  OnChangedMove(pokemonMove, pokemonChoose.Types.Select(t => HelperFunction.GetTypeEnumByName(t.Name)).ToList());}"
 													 SearchFuncWithCancel="async (search, token) => {return await PokemonSearchHelper<Move>.SearchName(search, PokemonInfo[FindIndexHasPokName(pokemonChoose.PokemonName)].Moves.Select(m => m.Move).ToList(), token);}"></MudAutocomplete>
 								</div>
 
@@ -70,16 +72,57 @@
 					<p>Loading</p>
 				</div>
 			}
-		</div>
+			</div>
 
-			<div class="d-flex justify-content-end">
+			<div class="d-flex justify-content-end ">
 				<MudButton OnClick="OnSave" Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit">Save</MudButton>
 			</div>
 		</div>
 		
 
-		<div class="d-flex flex-md-wrap w-50">
-			
+		<div class="d-inline-flex flex-md-wrap w-50 ">
+			<div class="custom-grid-contaner">
+				<div class="d-flex border-1 shadow-lg rounded flex-column" style="margin: 2% 4%">
+					<div class="d-flex w-100 justify-content-center">
+						<p style="font-weight: bold; font-size: 7px">Team Defence</p>
+					</div>
+				
+					<div class="d-flex w-100 m-3 flex-wrap">
+						@foreach(var type in Enum.GetValues(typeof(TypeEnum)).Cast<TypeEnum>())
+						{
+							<div class="d-inline-flex p-1 flex-column justify-content-center" style="height: 50px; width: 120px;">
+								<div class="d-flex justify-content-center border-1 rounded w-100" style="height: 24px; background-color: @_typeLogic.GetTypeColor(type);">
+									<p style="color: white; font-size: medium">@type.ToString()</p>
+								</div>
+								<div class="d-flex justify-content-center w-100" style="height: 20px; margin: 3px">
+									<p>@_typeLogic.TeamDefence[(int)type]</p>
+								</div>
+							</div>
+						}
+					</div>
+
+				</div>
+
+			<div class="d-flex border-1 shadow-lg rounded flex-column" style="margin: 2% 4%">
+					<div class="d-flex w-100 justify-content-center">
+						<p style="font-weight: bold; font-size: 7px">Team Type Coverage</p>
+					</div>
+
+					<div class="d-flex w-100 m-3 flex-wrap">
+						@foreach (var type in Enum.GetValues(typeof(TypeEnum)).Cast<TypeEnum>())
+						{
+							<div class="d-inline-flex p-1 flex-column justify-content-center" style="height: 50px; width: 120px;">
+								<div class="d-flex justify-content-center border-1 rounded w-100" style="height: 24px; background-color: @_typeLogic.GetTypeColor(type);">
+									<p style="color: white; font-size: medium">@type.ToString()</p>
+								</div>
+								<div class="d-flex justify-content-center w-100" style="height: 20px; margin: 3px">
+									<p>@_typeLogic.TeamTypeCoverage[(int)type]</p>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
 		</div>
 	
 </div>
@@ -99,6 +142,7 @@
 	ICollection<string> pokemonNameList { get; set; }
 
 	NamedApiResourceList<Item> ItemList { get; set; }
+
 	protected override async Task OnInitializedAsync()
 	{
 		if(IsUpdate == true)
@@ -110,8 +154,10 @@
 
 			foreach(var pokemon in PokemonChooses)
 			{
-				PokemonInfo.Add(await _pokemonService.GetPokemonInfoByNameAsync(pokemon.PokemonName));
+				var pokemonDetail = await _pokemonService.GetPokemonInfoByNameAsync(pokemon.PokemonName);
+				PokemonInfo.Add(pokemonDetail);
 				pokemon.PicUrl = $"https://play.pokemonshowdown.com/sprites/ani/{pokemon.PokemonName.ToLower()}.gif";
+				_typeLogic.AddPokemonType(pokemonDetail.Types.Select(t => HelperFunction.GetTypeEnumByName(t.Type.Name)).ToList());
 			}
 
 			for(int i = 0; i < 6 - numberOfPokemonSetup; i++)
@@ -144,6 +190,36 @@
 			pokemonNameList = (await _pokemonService.GetAllPokemonAsync()).Results.Select(p => p.Name).ToList();
 			ItemList = await _itemService.GetAllItemsAsync();
 		}
+	}
+
+	private async Task OnChangedMove(PokemonMoveChoose moveChoose, List<TypeEnum> pokTypesEnum)
+	{
+		var moveInfo = await CheckMoveValid(moveChoose.Name);
+		if (moveInfo == null)
+			return;
+
+		moveChoose.Type = moveInfo.Type;
+		moveChoose.Power = moveInfo.Power;
+
+
+		if(String.IsNullOrEmpty(moveChoose.LastMoveChooseType))
+		{
+			moveChoose.LastMoveChooseType = moveChoose.Type.Name;
+			moveChoose.LastMovePower = moveChoose.Power;
+			if(moveChoose.Power != null)
+				_typeLogic.AddMoveType(HelperFunction.GetTypeEnumByName(moveChoose.Type.Name), pokTypesEnum);
+		}
+		else
+		{
+			if(moveChoose.LastMovePower != null)
+			{
+				_typeLogic.RemoveMoveType(HelperFunction.GetTypeEnumByName(moveChoose.LastMoveChooseType), pokTypesEnum);
+			}
+			moveChoose.LastMoveChooseType = moveChoose.Type.Name;
+			moveChoose.LastMovePower = moveChoose.Power;
+			_typeLogic.AddMoveType(HelperFunction.GetTypeEnumByName(moveChoose.Type.Name), pokTypesEnum);
+		}
+
 
 	}
 
@@ -165,13 +241,33 @@
 	private async Task OnSelectPokemon(IEnumerable<string> selectedValue)
 	{
 		var index = FindIndexHasPokName(selectedValue!.First());
+		if(String.IsNullOrEmpty(PokemonInfo[index].Name) == false)
+		{
+			var pokemonTypes = PokemonInfo[index].Types.Select(t => HelperFunction.GetTypeEnumByName(t.Type.Name)).ToList();
+			_typeLogic.RemovePokemonType(pokemonTypes);
+			foreach(var move in PokemonChooses[index].Moves)
+			{
+				if(!String.IsNullOrEmpty(move.Name))
+				{
+					var moveInfo = await CheckMoveValid(move.Name);
+					if(moveInfo != null && moveInfo.Power != null)
+					{
+						_typeLogic.RemoveMoveType(HelperFunction.GetTypeEnumByName(move.Type.Name), pokemonTypes);
+						move.Name = "";
+						move.LastMoveChooseType = "";
+						move.LastMovePower = null;
+					}
+				}
+
+			}
+		}
 		PokemonInfo[index] = await _pokemonService.GetPokemonInfoByNameAsync(selectedValue!.First());
 		/* PokemonChooses[index].PicUrl = $"https://play.pokemonshowdown.com/sprites/ani/{PokemonInfo[index].Name.ToLower()}.gif";
 		PokemonChooses[index].Types = PokemonInfo[index].Types.Select(t => new TypeDto { Name = t.Type.Name }).ToList();
 		PokemonChooses[index].PokId = PokemonInfo[index].Id;
 		PokemonChooses[index].IsValid = true; */
 		PokemonChooses[index] = _mapper.MapPokemon(PokemonInfo[index]);
-
+		_typeLogic.AddPokemonType(PokemonChooses[index].Types.Select(t => HelperFunction.GetTypeEnumByName(t.Name)).ToList());
 	}
 
 	private bool CheckPokemonName(string PokName)

@@ -25,5 +25,9 @@ namespace Shared_Library.Models
     {
         [NotMapped]
         public bool IsValid { get; set; }
+        [NotMapped]
+        public string LastMoveChooseType { get; set; }
+        [NotMapped]
+        public int? LastMovePower { get; set; }
     }
 }
