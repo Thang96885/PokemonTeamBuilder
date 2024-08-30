@@ -183,7 +183,7 @@ namespace PokedexAppUseRedis.Controllers
 				}),
 
 				Issuer = _config.GetSection("Jwt:Issuer").Value,
-				Expires = DateTime.Now.AddMinutes(5),
+				Expires = DateTime.Now.AddSeconds(30),
 				SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
 			};
 

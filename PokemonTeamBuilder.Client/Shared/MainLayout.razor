@@ -3,38 +3,47 @@
 @inherits LayoutComponentBase
 @inject AuthHelper _authHelper
 @inject NotifyLoginService _notifyLoginService;
+@inject NavigationManager _navigationManager;
+
+@try
+{
+	@* Required *@
+	<MudThemeProvider />
 
 
-@* Required *@
-<MudThemeProvider />
+	@* Needed for dialogs *@
+	<MudDialogProvider />
+
+	@* Needed for snackbars *@
+	<MudSnackbarProvider />
 
 
-@* Needed for dialogs *@
-<MudDialogProvider />
-
-@* Needed for snackbars *@
-<MudSnackbarProvider />
-
-
-<MudLayout>
-	<MudMainContent>
-		<MudAppBar>
-			<MudSpacer></MudSpacer>
-			@if (_notifyLoginService != null && _notifyLoginService.UserName != "")
-			{
-				<MudAvatar Color="Color.Secondary">@_notifyLoginService.UserName.ToUpper()[0]</MudAvatar>
-			}
-			else
-			{
-				<a href="/login">
-					<MudButton Variant="Variant.Filled" Color="Color.Surface">Sign In</MudButton>
-				</a>
-			}
-		</MudAppBar>
-	</MudMainContent>
-	@Body
-</MudLayout>
-
+	<MudLayout>
+		<MudMainContent>
+			<MudAppBar>
+				<MudSpacer></MudSpacer>
+				@if (_notifyLoginService != null && _notifyLoginService.UserName != "")
+				{
+					<MudAvatar Color="Color.Secondary">@_notifyLoginService.UserName.ToUpper()[0]</MudAvatar>
+				}
+				else
+				{
+					<a href="/login">
+						<MudButton Variant="Variant.Filled" Color="Color.Surface">Sign In</MudButton>
+					</a>
+				}
+			</MudAppBar>
+		</MudMainContent>
+		@Body
+	</MudLayout>
+}
+catch (Exception e)
+{
+	if(e.Message == "token expried")
+	{
+		_navigationManager.NavigateTo("/login");
+	}
+}
 	
 
 

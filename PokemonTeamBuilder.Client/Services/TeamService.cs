@@ -17,11 +17,11 @@ namespace PokemonTeamBuilder.Client.Services
 	public class TeamService : ITeamService
 	{
 		private readonly HttpClient _client;
-		private readonly AuthHelper _authHelper;
+		private readonly TokenAuthenticationStateProvider _authProvider;
 
-		public TeamService(HttpClient client, AuthHelper authHelper)
+		public TeamService(HttpClient client, TokenAuthenticationStateProvider authProvider)
 		{
-			_authHelper = authHelper;
+			_authProvider = authProvider;
 			_client = client;
 		}
 
@@ -49,7 +49,7 @@ namespace PokemonTeamBuilder.Client.Services
 		{
 			try
 			{
-				_client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await _authHelper.GetJwtToken());
+				_client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await _authProvider.GetToken());
 				var respone = await _client.GetAsync("/GetAllTeam?userName=" + userName);
 				if(respone.StatusCode == System.Net.HttpStatusCode.OK)
 				{
@@ -63,6 +63,10 @@ namespace PokemonTeamBuilder.Client.Services
 			}
 			catch(Exception e)
 			{
+				if (e.Message == "token expired")
+				{
+					throw e;
+				}
 				return new List<Team>();
 			}
 		}
@@ -71,7 +75,7 @@ namespace PokemonTeamBuilder.Client.Services
 		{
 			try
 			{
-				_client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await _authHelper.GetJwtToken());
+				_client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await _authProvider.GetToken());
 				var response = await _client.GetAsync("/GetPokemonSetupInTeam?teamId=" + teamId);
 				if (response.StatusCode == System.Net.HttpStatusCode.OK)
 				{
@@ -84,6 +88,10 @@ namespace PokemonTeamBuilder.Client.Services
 			}
 			catch (Exception e)
 			{
+				if(e.Message == "token expired")
+				{
+					throw e;
+				}
 				return new List<PokemonSetUp>();
 			}
         }

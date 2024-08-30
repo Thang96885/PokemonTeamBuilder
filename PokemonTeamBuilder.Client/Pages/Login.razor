@@ -4,7 +4,6 @@
 @using Shared_Library.Dto
 @inject IAuthService _authService;
 @inject ISnackbar _snackbar;
-@inject AuthHelper _authHelper;
 @inject NotifyLoginService _notifyLoginService;
 @inject NavigationManager _navigationManager;
 
@@ -67,7 +66,6 @@
 		else
 		{
 			_snackbar.Add(result.Message, Severity.Success);
-			_authHelper.StoreToken(result);
 			_notifyLoginService.SetUserName(result.UserName.ToUpper());
 			_navigationManager.NavigateTo("/", forceLoad:true);
 		}

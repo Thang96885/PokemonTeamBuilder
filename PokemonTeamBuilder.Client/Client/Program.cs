@@ -7,6 +7,7 @@ using Blazored.LocalStorage;
 using Blazored.SessionStorage;
 using PokemonTeamBuilder.Client.Helper;
 using PokemonTeamBuilder.Client.Enums;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace PokemonTeamBuilder.Client
 {
@@ -35,6 +36,8 @@ namespace PokemonTeamBuilder.Client
 			builder.Services.AddScoped<IMoveService, MoveService>();
 			builder.Services.AddScoped<CustomMapper>();
 			builder.Services.AddScoped<TypeLogic>();
+			builder.Services.AddScoped<TokenAuthenticationStateProvider>();
+
 
 
 			await builder.Build().RunAsync();

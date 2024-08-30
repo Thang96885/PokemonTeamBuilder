@@ -14,7 +14,7 @@ namespace PokemonTeamBuilder.Client.Helper
 			_sessionStorageService = sessionStorageService;
 			_localStorageService = localStorageService;
 		}
-		public async void StoreToken(LoginResultDto token)
+		public async Task StoreToken(LoginResultDto token)
 		{
 			try
 			{
@@ -38,7 +38,7 @@ namespace PokemonTeamBuilder.Client.Helper
 
 		public async Task<string> GetRefreshToken()
 		{
-			var token = await _sessionStorageService.GetItemAsync<string>("RefreshTOken");
+			var token = await _sessionStorageService.GetItemAsync<string>("RefreshToken");
 			return token;
 		}
 
